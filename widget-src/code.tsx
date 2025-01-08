@@ -1,30 +1,55 @@
 const { widget } = figma;
-const { SVG, Text, Frame, useSyncedState } = widget;
+const { SVG, Input, Frame, useSyncedState } = widget;
 
 function LotusFlower() {
-  const [texts, setTexts] = useSyncedState("texts", ["1", "2", "3", "4", "5"]); // Four petals + center
+  const [texts, setTexts] = useSyncedState("texts", ["", "", "", "", ""]); // Four petals + center
 
   const handlePetalClick = (index: number) => {
     console.log(`Petal ${index} clicked`);
     // Logic to create a new flower connected to this petal
   };
 
+  const handlePlusClick = (index: number) => {
+    console.log(`Plus ${index} clicked`);
+    // Add your callback logic here
+  };
+
   return (
-    <Frame width={1048} height={546}>
+    <Frame minWidth={1048} minHeight={546} width={1048} height={546}>
       {/* Render your SVG */}
       <SVG src={lotusSvgSource}></SVG>
 
       {/* Add editable text areas */}
       {texts.map((text: string, index: number) => (
-        <Text
-          fontSize={48}
-          x={getPetalX(index)}
-          y={getPetalY(index)}
-          key={index}
-          onClick={() => handlePetalClick(index)}
-        >
-          {text}
-        </Text>
+        <>
+          <Input
+            fontSize={24}
+            x={getPetalX(index)}
+            y={getPetalY(index)}
+            key={`input-${index}`}
+            onClick={() => handlePetalClick(index)}
+            value={text}
+            placeholder={index === 4 ? "Main Idea" : "Supporting Idea"}
+            onTextEditEnd={(text) =>
+              setTexts(texts.map((_, i) => (i === index ? text.characters : _)))
+            }
+            horizontalAlignText="center"
+          />
+          {/* Only show plus icons for the first 4 petals */}
+          {index < 4 && (
+            <SVG
+              src={`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="11" stroke="black" stroke-width="2"/>
+                <path d="M12 6V18" stroke="black" stroke-width="2"/>
+                <path d="M18 12L6 12" stroke="black" stroke-width="2"/>
+              </svg>`}
+              x={getPetalX(index) + (index === 0 ? -50 : index === 1 ? 50 : 0)}
+              y={getPetalY(index) + (index === 2 ? -50 : index === 3 ? 50 : 0)}
+              onClick={() => handlePlusClick(index)}
+              key={`plus-${index}`}
+            />
+          )}
+        </>
       ))}
     </Frame>
   );
@@ -35,8 +60,8 @@ widget.register(LotusFlower);
 // Helper functions to position text areas in a cross formation
 function getPetalX(index: number): number {
   // Center X position
-  const centerX = 524; // Center of the SVG (1048/2)
-  const offset = 200; // Horizontal offset from center
+  const centerX = 424; // Center of the SVG (1048/2)
+  const offset = 300; // Horizontal offset from center
 
   switch (index) {
     case 0:
