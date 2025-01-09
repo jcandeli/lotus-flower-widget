@@ -1,5 +1,6 @@
 const { widget } = figma;
-const { SVG, Input, Frame, useSyncedState } = widget;
+const { SVG, Input, Frame, useSyncedState, useSyncedMap, AutoLayout, Text } =
+  widget;
 
 const lotusSvgSource = `<svg width="1048" height="546" viewBox="0 0 1048 546" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path
@@ -86,20 +87,11 @@ const lotusSvgSource = `<svg width="1048" height="546" viewBox="0 0 1048 546" fi
   </defs>
 </svg>`;
 
-function LotusFlower() {
-  const [texts, setTexts] = useSyncedState("texts", ["", "", "", "", ""]); // Four petals + center
-
-  const handlePlusClick = (index: number) => {
-    console.log(`Plus ${index} clicked`);
-    // Add your callback logic here
-  };
-
+function LotusComponent({ texts, setTexts, onPlusClick }) {
   return (
     <Frame minWidth={1048} minHeight={546} width={1048} height={546}>
-      {/* Render your SVG */}
       <SVG src={lotusSvgSource}></SVG>
 
-      {/* Add editable text areas */}
       {texts.map((text: string, index: number) => (
         <>
           <Input
@@ -114,7 +106,6 @@ function LotusFlower() {
             }
             horizontalAlignText="center"
           />
-          {/* Only show plus icons for the first 4 petals */}
           {index < 4 && (
             <SVG
               src={`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -124,13 +115,71 @@ function LotusFlower() {
               </svg>`}
               x={getPetalX(index) + (index === 0 ? -55 : index === 1 ? 100 : 0)}
               y={getPetalY(index) + (index === 2 ? -65 : index === 3 ? 100 : 0)}
-              onClick={() => handlePlusClick(index)}
+              onClick={() => onPlusClick(index)}
               key={`plus-${index}`}
             />
           )}
         </>
       ))}
     </Frame>
+  );
+}
+
+function LotusFlower() {
+  const [texts, setTexts] = useSyncedState("texts", ["", "", "", "", ""]);
+  const lotusMap = useSyncedMap("lotusMap");
+
+  // Helper function to generate position for new lotus
+  const getNewLotusPosition = async (sourceIndex: number, widgetId: string) => {
+    const sourceWidget = (await figma.getNodeByIdAsync(widgetId)) as WidgetNode;
+    if (!sourceWidget) return { x: 0, y: 0 };
+
+    const offset = 1200; // Distance between lotus flowers
+    const angle = (sourceIndex * Math.PI) / 2; // 0, 90, 180, or 270 degrees based on petal index
+
+    return {
+      x: sourceWidget.x + offset * Math.cos(angle),
+      y: sourceWidget.y + offset * Math.sin(angle),
+    };
+  };
+  const handlePlusClick = async (index: number) => {
+    const widgetId = figma.widget.id;
+    const position = await getNewLotusPosition(index, widgetId);
+
+    // Generate unique ID for new lotus
+    const newLotusId = `lotus-${Date.now()}`;
+
+    // Store new lotus data
+    lotusMap.set(newLotusId, {
+      position,
+      texts: ["", "", "", "", ""],
+    });
+  };
+
+  return (
+    <AutoLayout direction="vertical">
+      {/* Main Lotus */}
+      <LotusComponent
+        texts={texts}
+        setTexts={setTexts}
+        onPlusClick={handlePlusClick}
+      />
+
+      {/* Child Lotuses */}
+      {[...lotusMap.entries()].map(([id, lotus]) => (
+        <LotusComponent
+          key={`child-${id}`}
+          texts={lotus.texts}
+          setTexts={(newTexts) => {
+            lotusMap.set(id, {
+              ...lotus,
+              texts: newTexts,
+            });
+          }}
+          onPlusClick={handlePlusClick}
+        />
+      ))}
+    </AutoLayout>
   );
 }
 
