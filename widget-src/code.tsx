@@ -1,105 +1,6 @@
 const { widget } = figma;
 const { SVG, Input, Frame, useSyncedState } = widget;
 
-function LotusFlower() {
-  const [texts, setTexts] = useSyncedState("texts", ["", "", "", "", ""]); // Four petals + center
-
-  const handlePetalClick = (index: number) => {
-    console.log(`Petal ${index} clicked`);
-    // Logic to create a new flower connected to this petal
-  };
-
-  const handlePlusClick = (index: number) => {
-    console.log(`Plus ${index} clicked`);
-    // Add your callback logic here
-  };
-
-  return (
-    <Frame minWidth={1048} minHeight={546} width={1048} height={546}>
-      {/* Render your SVG */}
-      <SVG src={lotusSvgSource}></SVG>
-
-      {/* Add editable text areas */}
-      {texts.map((text: string, index: number) => (
-        <>
-          <Input
-            fontSize={24}
-            x={getPetalX(index)}
-            y={getPetalY(index)}
-            key={`input-${index}`}
-            onClick={() => handlePetalClick(index)}
-            value={text}
-            placeholder={index === 4 ? "Main Idea" : "Supporting Idea"}
-            onTextEditEnd={(text) =>
-              setTexts(texts.map((_, i) => (i === index ? text.characters : _)))
-            }
-            horizontalAlignText="center"
-          />
-          {/* Only show plus icons for the first 4 petals */}
-          {index < 4 && (
-            <SVG
-              src={`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="11" stroke="black" stroke-width="2"/>
-                <path d="M12 6V18" stroke="black" stroke-width="2"/>
-                <path d="M18 12L6 12" stroke="black" stroke-width="2"/>
-              </svg>`}
-              x={getPetalX(index) + (index === 0 ? -50 : index === 1 ? 50 : 0)}
-              y={getPetalY(index) + (index === 2 ? -50 : index === 3 ? 50 : 0)}
-              onClick={() => handlePlusClick(index)}
-              key={`plus-${index}`}
-            />
-          )}
-        </>
-      ))}
-    </Frame>
-  );
-}
-
-widget.register(LotusFlower);
-
-// Helper functions to position text areas in a cross formation
-function getPetalX(index: number): number {
-  // Center X position
-  const centerX = 424; // Center of the SVG (1048/2)
-  const offset = 300; // Horizontal offset from center
-
-  switch (index) {
-    case 0:
-      return centerX - offset; // Left
-    case 1:
-      return centerX + offset; // Right
-    case 2:
-      return centerX; // Top
-    case 3:
-      return centerX; // Bottom
-    case 4:
-      return centerX; // Center
-    default:
-      return centerX;
-  }
-}
-
-function getPetalY(index: number): number {
-  // Center Y position
-  const centerY = 273; // Center of the SVG (546/2)
-  const offset = 150; // Vertical offset from center
-
-  switch (index) {
-    case 0:
-      return centerY; // Left
-    case 1:
-      return centerY; // Right
-    case 2:
-      return centerY - offset; // Top
-    case 3:
-      return centerY + offset; // Bottom
-    case 4:
-      return centerY; // Center
-    default:
-      return centerY;
-  }
-}
-
 const lotusSvgSource = `<svg width="1048" height="546" viewBox="0 0 1048 546" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path
     d="M406.581 166.48C406.581 186.178 421.71 233.776 406.581 243.599C398.21 249.035 359.514 232.556 348.868 232.556C318.979 232.556 295.829 197.077 295.829 166.48C301.223 120.834 294.92 117.119 294.75 111.079C302.772 114.378 301.942 118.441 348.868 111.079C384.646 111.079 406.581 135.883 406.581 166.48Z"
@@ -184,3 +85,96 @@ const lotusSvgSource = `<svg width="1048" height="546" viewBox="0 0 1048 546" fi
     </linearGradient>
   </defs>
 </svg>`;
+
+function LotusFlower() {
+  const [texts, setTexts] = useSyncedState("texts", ["", "", "", "", ""]); // Four petals + center
+
+  const handlePlusClick = (index: number) => {
+    console.log(`Plus ${index} clicked`);
+    // Add your callback logic here
+  };
+
+  return (
+    <Frame minWidth={1048} minHeight={546} width={1048} height={546}>
+      {/* Render your SVG */}
+      <SVG src={lotusSvgSource}></SVG>
+
+      {/* Add editable text areas */}
+      {texts.map((text: string, index: number) => (
+        <>
+          <Input
+            fontSize={24}
+            x={getPetalX(index)}
+            y={getPetalY(index)}
+            key={`input-${index}`}
+            value={text}
+            placeholder={index === 4 ? "Main Idea" : "Supporting Idea"}
+            onTextEditEnd={(text) =>
+              setTexts(texts.map((_, i) => (i === index ? text.characters : _)))
+            }
+            horizontalAlignText="center"
+          />
+          {/* Only show plus icons for the first 4 petals */}
+          {index < 4 && (
+            <SVG
+              src={`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="11" stroke="black" stroke-width="2"/>
+                <path d="M12 6V18" stroke="black" stroke-width="2"/>
+                <path d="M18 12L6 12" stroke="black" stroke-width="2"/>
+              </svg>`}
+              x={getPetalX(index) + (index === 0 ? -55 : index === 1 ? 100 : 0)}
+              y={getPetalY(index) + (index === 2 ? -65 : index === 3 ? 100 : 0)}
+              onClick={() => handlePlusClick(index)}
+              key={`plus-${index}`}
+            />
+          )}
+        </>
+      ))}
+    </Frame>
+  );
+}
+
+widget.register(LotusFlower);
+
+// Helper functions to position text areas in a cross formation
+function getPetalX(index: number): number {
+  // Center X position
+  const centerX = 424; // Center of the SVG (1048/2)
+  const offset = 300; // Horizontal offset from center
+
+  switch (index) {
+    case 0:
+      return centerX - offset; // Left
+    case 1:
+      return centerX + offset; // Right
+    case 2:
+      return centerX; // Top
+    case 3:
+      return centerX; // Bottom
+    case 4:
+      return centerX; // Center
+    default:
+      return centerX;
+  }
+}
+
+function getPetalY(index: number): number {
+  // Center Y position
+  const centerY = 273; // Center of the SVG (546/2)
+  const offset = 150; // Vertical offset from center
+
+  switch (index) {
+    case 0:
+      return centerY; // Left
+    case 1:
+      return centerY; // Right
+    case 2:
+      return centerY - offset; // Top
+    case 3:
+      return centerY + offset; // Bottom
+    case 4:
+      return centerY; // Center
+    default:
+      return centerY;
+  }
+}
